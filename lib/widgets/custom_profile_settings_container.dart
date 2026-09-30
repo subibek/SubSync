@@ -41,20 +41,20 @@ class _CustomProfileSettingsContainerState extends State<CustomProfileSettingsCo
       onTap: widget.onTap,
       child: Container(
         decoration: BoxDecoration(
-        color: themeBloc.isDarkMode ? SubSyncColors.gray80 : SubSyncColors.gray0,
+        color: themeBloc.isDarkMode ? SubSyncColors.gray80 : SubSyncColors.gray20,
         borderRadius: BorderRadius.circular(widget.borderRadius ?? 16),
         boxShadow: [
           BoxShadow(
             blurRadius: 16,
             offset: const Offset(0, 8),
             spreadRadius: 0,
-            color: const Color(0xff1C191705).withOpacity(0.02)
+            color: themeBloc.isDarkMode ? SubSyncColors.gray80.withAlpha(2) : SubSyncColors.gray0.withAlpha(2)
           ),
           BoxShadow(
             blurRadius: 8,
             offset: const Offset(0, 4),
             spreadRadius: 0,
-            color: const Color(0xff1C191705).withOpacity(0.03)
+            color: themeBloc.isDarkMode ? SubSyncColors.gray80.withAlpha(2) : SubSyncColors.gray0.withAlpha(2)
           ),
         ]
       ),        

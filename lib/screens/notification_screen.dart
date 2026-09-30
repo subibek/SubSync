@@ -254,8 +254,8 @@ class _NotificationScreenState extends State<NotificationScreen> with TickerProv
             decoration: const BoxDecoration(
               color: Colors.amber,
               shape: BoxShape.circle,
-              image: DecorationImage(
-                image: AssetImage('assets/avatars/avatar-39.png')),
+              // image: DecorationImage(
+              //   image: AssetImage('assets/avatars/avatar-39.png')),
             ),
           ), 
         );

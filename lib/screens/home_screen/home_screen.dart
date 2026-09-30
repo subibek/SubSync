@@ -5,7 +5,6 @@ import 'package:subsync/blocs/theme_bloc.dart';
 import 'package:subsync/utils/colors.dart';
 import 'package:subsync/utils/route/route_names.dart';
 import 'package:subsync/widgets/custom_list_tile.dart';
-import 'package:subsync/widgets/custom_profile_settings_container.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -41,6 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   Expanded(
                     child: CustomListTile(
+                      color: themeBloc.isDarkMode ? SubSyncColors.gray80 : SubSyncColors.gray20,
                       onTap: () => context.go('${RouteNames.homeScreen}${RouteNames.punchScreen}'),
                       child: Center(child: Text('Punch', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600))),
                     ),

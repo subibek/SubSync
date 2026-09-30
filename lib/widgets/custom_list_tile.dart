@@ -6,20 +6,23 @@ class CustomListTile extends StatelessWidget {
   CustomListTile({
     super.key,
     required this.onTap,
-    required this.child
+    required this.child,
+    this.color
   });
 
   GestureTapCallback onTap;
   Widget child;
+  Color? color;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
+      child: 
+      Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: themeBloc.isDarkMode ? SubSyncColors.gray80 : SubSyncColors.gray0,
+          color: color ?? (themeBloc.isDarkMode ? SubSyncColors.gray80 : SubSyncColors.gray20),
           borderRadius: BorderRadius.circular(16),
         ),
         child: child,

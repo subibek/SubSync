@@ -18,6 +18,7 @@ class MyApp extends StatelessWidget {
       initialData: themeBloc.currentTheme,
       builder: (context, snapshot) {
         return MaterialApp.router(
+          key: ValueKey(themeBloc.currentTheme.data.brightness),
           debugShowCheckedModeBanner: false,
           routerConfig: AppRoutes.router,
           theme: snapshot.data!.data,

@@ -64,7 +64,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'All rights reserved, 2025©',
+                        'All rights reserved, 2026©',
                         style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
                         // style: Theme.of(context).textTheme.textXs.copyWith(color: themeBloc.isDarkMode ? PiggyColors.gray30 : PiggyColors.gray60),
                       ),
@@ -128,6 +128,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           CustomProfileSettingsContainer(leadingIconPath: 'assets/icons/ChatDots.svg', text: 'Live Chat', onTap: (){
+          context.push('${RouteNames.profileScreen}${RouteNames.profileSettingsScreen}${RouteNames.helpCenterScreen}');
           }),
           CustomProfileSettingsContainer(leadingIconPath: 'assets/icons/Star.svg', text: 'Feature Request', onTap: (){
           }, trailingWidget: _buildArrowSquareOutIcon()),
@@ -162,7 +163,9 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           CustomProfileSettingsContainer(leadingIconPath: 'assets/icons/Bell_Outlined.svg', text: 'Push Notifications', 
-          onTap: (){}),
+          onTap: (){
+            context.push('${RouteNames.profileScreen}${RouteNames.profileSettingsScreen}${RouteNames.notificationSettingsScreen}');
+          }),
           CustomProfileSettingsContainer(leadingIconPath: 'assets/icons/SpeakerSimpleHigh.svg', text: 'Sound Notification', onTap: (){}),
           CustomProfileSettingsContainer(leadingIconPath: 'assets/icons/EnvelopeSimple.svg', text: 'Email Notification', onTap: (){})
         ],
@@ -177,8 +180,12 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          CustomProfileSettingsContainer(leadingIconPath: 'assets/icons/User.svg', text: 'Profile Info', onTap: (){}),
-          CustomProfileSettingsContainer(leadingIconPath: 'assets/icons/Palette.svg', text: 'Display & Appearence', onTap: (){}),
+          CustomProfileSettingsContainer(leadingIconPath: 'assets/icons/User.svg', text: 'Profile Info', onTap: (){
+            context.push('${RouteNames.profileScreen}${RouteNames.profileSettingsScreen}${RouteNames.profileInfoScreen}');
+          }),
+          CustomProfileSettingsContainer(leadingIconPath: 'assets/icons/Palette.svg', text: 'Display & Appearence', onTap: (){
+            context.push('${RouteNames.profileScreen}${RouteNames.profileSettingsScreen}${RouteNames.appearanceModeScreen}');
+          }),
           CustomProfileSettingsContainer(leadingIconPath: 'assets/icons/GearSix.svg', text: 'Preferences', onTap: (){}),
           CustomProfileSettingsContainer(leadingIconPath: 'assets/icons/CurrencyDollarSimple.svg', text: 'Currency', onTap: (){}),
           CustomProfileSettingsContainer(leadingIconPath: 'assets/icons/info_outlined.svg', text: 'About Us', onTap: (){}),

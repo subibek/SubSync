@@ -22,6 +22,7 @@ class CustomTextField extends StatefulWidget {
   final String? Function(String?)? validator;
   final Function(String)? onChanged;
   final EdgeInsets? contentPadding;
+  final bool? enabled;
 
   final bool? obscureText;
 
@@ -41,6 +42,7 @@ class CustomTextField extends StatefulWidget {
     this.obscureText,
     this.validator,
     this.onChanged,
+    this.enabled
   });
 
   @override
@@ -81,6 +83,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
               onChanged: widget.onChanged,
               obscureText: isObscureText,
               maxLines: 1,
+              enabled: widget.enabled,
               decoration: InputDecoration(
                 isDense: true,
 
@@ -92,7 +95,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
                 
                 contentPadding: widget.contentPadding ?? const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                 filled: true,
-                fillColor: themeBloc.isDarkMode ? SubSyncColors.gray80 : SubSyncColors.gray30,
+                fillColor: themeBloc.isDarkMode ? SubSyncColors.gray80 : SubSyncColors.gray20,
             
                 prefixIcon: 
                 (widget.prefixWidget != null) ? widget.prefixWidget :

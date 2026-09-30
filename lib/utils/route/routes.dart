@@ -7,8 +7,13 @@ import 'package:subsync/screens/home_screen/home_screen.dart';
 import 'package:subsync/screens/home_screen/punch_screen.dart';
 import 'package:subsync/screens/main_screen.dart';
 import 'package:subsync/screens/notification_screen.dart';
+import 'package:subsync/screens/profile_screen/help_center_screen.dart';
+import 'package:subsync/screens/profile_screen/profile_faq_screen.dart';
 import 'package:subsync/screens/profile_screen/profile_screen.dart';
 import 'package:subsync/screens/profile_screen/profile_settings_screen.dart';
+import 'package:subsync/screens/profile_screen/sub_screens/appearance_mode_screen.dart';
+import 'package:subsync/screens/profile_screen/sub_screens/notification_settings_screen.dart';
+import 'package:subsync/screens/profile_screen/sub_screens/profile_info_screen.dart';
 import 'package:subsync/screens/schedule_screen/schedule_screen.dart';
 import 'package:subsync/screens/services_screen/services_screen.dart';
 import 'package:subsync/screens/splash_screen/splash_screen.dart';
@@ -92,6 +97,40 @@ class AppRoutes {
                   GoRoute(
                     path: RouteNames.profileSettingsScreen,
                     builder: (context, state) => const ProfileSettingsScreen(), 
+                    routes: [
+                      GoRoute(
+                        path: RouteNames.profileInfoScreen,
+                        builder: (context, state) {
+                          return const ProfileInfoScreen();
+                        }, 
+                      ),
+                      GoRoute(
+                        path: RouteNames.appearanceModeScreen,
+                        builder: (context, state) {
+                          return const AppearanceModeScreen();
+                        }, 
+                      ),
+                      GoRoute(
+                        path: RouteNames.notificationSettingsScreen,
+                        builder: (context, state) {
+                          return const NotificationSettingsScreen();
+                        }, 
+                      ),
+                      GoRoute(
+                        path: RouteNames.helpCenterScreen,
+                        builder: (context, state) {
+                          return const HelpCenterScreen();
+                        }, 
+                        routes: [
+                          GoRoute(
+                            path: RouteNames.faqScreen,
+                            builder: (context, state) {
+                              return const ProfileFaqScreen();
+                            }, 
+                          ),
+                        ]
+                      ),
+                    ]
                   )
                 ]
               )

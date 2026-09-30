@@ -91,7 +91,7 @@ class CustomButton extends StatelessWidget {
               ),
               if(trailingIcon != null)
                 Row(children: [
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 8),
                   trailingIcon!
                   
                 ],) 

@@ -2,10 +2,12 @@ import 'dart:collection';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:subsync/blocs/theme_bloc.dart';
 import 'package:subsync/utils/colors.dart';
 import 'package:subsync/utils/route/route_names.dart';
+import 'package:subsync/utils/text_theme.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -53,28 +55,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         children: [
-          _buildAppBarListTile(icon: Icon(Icons.local_activity, color: SubSyncColors.gray20,), title: 'Activity', onTap: (){}),
+          _buildAppBarListTile(iconPath: 'assets/icons/ClockClockwise.svg', title: 'Activity', onTap: (){}),
           const SizedBox(height: 10),
-          _buildAppBarListTile(icon: Icon(Icons.comment, color: SubSyncColors.gray20,), title: 'Get Help', onTap: (){}),
+          _buildAppBarListTile(iconPath: 'assets/icons/Chat.svg', title: 'Get Help', onTap: () => context.go('${RouteNames.profileScreen}${RouteNames.profileSettingsScreen}${RouteNames.helpCenterScreen}')),
           const SizedBox(height: 10),
-          _buildAppBarListTile(icon: Icon(Icons.settings, color: SubSyncColors.gray20,), title: 'Settings',
-            onTap: (){
-                  context.go("${RouteNames.profileScreen}${RouteNames.profileSettingsScreen}");
-
-            }
-          ),
+          _buildAppBarListTile(iconPath: 'assets/icons/GearSix.svg', title: 'Settings', onTap: () => context.go("${RouteNames.profileScreen}${RouteNames.profileSettingsScreen}")),
           const SizedBox(height: 10),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 24), 
             child: Divider(height: 1, color: themeBloc.isDarkMode ? SubSyncColors.gray70 : SubSyncColors.gray20)
           ),
-          _buildAppBarListTile(icon: Icon(Icons.exit_to_app, color: SubSyncColors.destructive60,), title: 'Sign Out', iconColor: SubSyncColors.destructive60, onTap: (){})
+          _buildAppBarListTile(iconPath: 'assets/icons/SignOut.svg', title: 'Sign Out', iconColor: SubSyncColors.destructive60, onTap: (){})
         ],
       ),
     );
   }
 
-  Widget _buildAppBarListTile({required Widget icon, required String title, Color? iconColor, required GestureCancelCallback onTap}) {
+  Widget _buildAppBarListTile({required String iconPath, required String title, Color? iconColor, required GestureCancelCallback onTap}) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
@@ -82,14 +79,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         padding: const EdgeInsets.symmetric(vertical: 12),
         child: Row(
           children: [
-            icon,
+            SvgPicture.asset(iconPath, width: 24, colorFilter: ColorFilter.mode((iconColor != null) ? iconColor :SubSyncColors.gray40, BlendMode.srcIn)),
             const SizedBox(width: 12),
             Text(
               title,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.white
-              ),
+              style: Theme.of(context).textTheme.textSm.copyWith(fontWeight: SubSyncTextStyles.medium)
             )
           ],
         ),  

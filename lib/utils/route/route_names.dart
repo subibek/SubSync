@@ -14,5 +14,9 @@ class RouteNames {
   static const profileSettingsScreen = '/profileSettingsScreen';
   static const punchScreen = '/punchScreen';
   static const notificationScreen = '/notificationScreen';
-
+  static const appearanceModeScreen = '/appearanceModeScreen';
+  static const notificationSettingsScreen = '/notificationSettingsScreen';
+  static const helpCenterScreen = '/helpCenterScreen';
+  static const faqScreen = '/faqScreen';
+  static const profileInfoScreen = '/profileInfo';
 }
