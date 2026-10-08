@@ -1,6 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:subsync/blocs/theme_bloc.dart';
+import 'package:subsync/models/user_info_model.dart';
+import 'package:subsync/models/user_model.dart';
+import 'package:subsync/services/user_service.dart';
 import 'package:subsync/utils/colors.dart';
 import 'package:subsync/utils/text_theme.dart';
 import 'package:subsync/widgets/custom_arrow_back_button.dart';
@@ -22,6 +28,8 @@ class ProfileInfoScreen extends StatefulWidget {
 }
 
 class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
+
+  bool isButtonLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +58,26 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
                 const SizedBox(height: 24),
                 _buildRoleTextField(),
                 const SizedBox(height: 24),
-                CustomButton(onTap: (){}, outlinedBorder: false, title: 'Save changes', trailingIcon: SvgPicture.asset('assets/icons/check_mark.svg', width: 18, fit: BoxFit.scaleDown, colorFilter: const ColorFilter.mode( SubSyncColors.gray0,BlendMode.srcIn))),
+                CustomButton(
+                  isLoading: isButtonLoading,
+                  onTap: () async {
+                    setState(() => isButtonLoading = true);
+                  SharedPreferences prefs = await SharedPreferences.getInstance();
+                  final userInfo = prefs.getString('currentUserInfo');
+                  UserInfoModel currentUserInfo = UserInfoModel.fromJson(jsonDecode(userInfo!));  
+                  if(
+                    currentUserInfo.data.firstName == ProfileInfoScreen.firstNameController.text &&
+                    currentUserInfo.data.lastName == ProfileInfoScreen.lastNameController.text &&
+                    currentUserInfo.data.phone == ProfileInfoScreen.phoneNumberController.text
+                  ){
+                    setState(() => isButtonLoading = false);
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('No changes made.')));
+                  } else {
+                    final result = await UserService.updateUserInfo(currentUserInfo, ProfileInfoScreen.firstNameController.text, ProfileInfoScreen.lastNameController.text, ProfileInfoScreen.phoneNumberController.text);
+                    setState(() => isButtonLoading = false);
+                    if(result != null) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('User info updated.')));
+                  }
+                }, outlinedBorder: false, title: 'Save changes', trailingIcon: SvgPicture.asset('assets/icons/check_mark.svg', width: 18, fit: BoxFit.scaleDown, colorFilter: const ColorFilter.mode( SubSyncColors.gray0,BlendMode.srcIn))),
                 const SizedBox(height: 40),
               ],
             ), 
@@ -87,6 +114,7 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
   CustomTextField _buildFirstNameTextField() {
     return CustomTextField(
       label: 'First Name',
+      obscureText: false,
       keyboardType: TextInputType.text,
       controller: ProfileInfoScreen.firstNameController,
       contentPadding: const EdgeInsets.symmetric(vertical: 13, horizontal: 12),

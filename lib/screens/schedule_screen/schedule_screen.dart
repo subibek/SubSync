@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:subsync/blocs/theme_bloc.dart';
 import 'package:subsync/models/schedule_details_model.dart';
 import 'package:subsync/models/schedule_model.dart';
+import 'package:subsync/screens/home_screen/home_screen.dart';
 import 'package:subsync/services/schedule_service.dart';
 import 'package:subsync/utils/border_radius.dart';
 import 'package:subsync/utils/text_theme.dart';
@@ -34,9 +35,10 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     try{
 
       allSchedule = await ScheduleService.getUserSchedule();
+
       if(allSchedule == null){
         setState(() {
-          _error = "Schedule retured empty.";
+          _error = "Schedule returned empty.";
           _loading = false;
         });  
       } else {

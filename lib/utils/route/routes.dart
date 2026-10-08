@@ -15,7 +15,7 @@ import 'package:subsync/screens/profile_screen/sub_screens/appearance_mode_scree
 import 'package:subsync/screens/profile_screen/sub_screens/notification_settings_screen.dart';
 import 'package:subsync/screens/profile_screen/sub_screens/profile_info_screen.dart';
 import 'package:subsync/screens/schedule_screen/schedule_screen.dart';
-import 'package:subsync/screens/services_screen/services_screen.dart';
+import 'package:subsync/screens/invoice_screen/invoice_screen.dart';
 import 'package:subsync/screens/splash_screen/splash_screen.dart';
 import 'package:subsync/utils/route/route_names.dart';
 
@@ -83,7 +83,7 @@ class AppRoutes {
             routes: <RouteBase>[
               GoRoute(
                 path: RouteNames.servicesScreen,
-                builder: (context, state) => const ServicesScreen(), 
+                builder: (context, state) => const InvoiceScreen(), 
               )
             ] 
           ),

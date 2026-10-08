@@ -1,23 +1,23 @@
 import 'dart:convert';
 
-class UserInfoModel {
+class ClockInModel {
     final String message;
     final Data data;
     final int status;
     final dynamic error;
 
-    UserInfoModel({
+    ClockInModel({
         required this.message,
         required this.data,
         required this.status,
         required this.error,
     });
 
-    factory UserInfoModel.fromRawJson(String str) => UserInfoModel.fromJson(json.decode(str));
+    factory ClockInModel.fromRawJson(String str) => ClockInModel.fromJson(json.decode(str));
 
     String toRawJson() => json.encode(toJson());
 
-    factory UserInfoModel.fromJson(Map<String, dynamic> json) => UserInfoModel(
+    factory ClockInModel.fromJson(Map<String, dynamic> json) => ClockInModel(
         message: json["message"],
         data: Data.fromJson(json["data"]),
         status: json["status"],
@@ -34,21 +34,15 @@ class UserInfoModel {
 
 class Data {
     final String id;
-    final String username;
-    final String email;
-    dynamic firstName;
-    dynamic lastName;
-    final String role;
-    dynamic phone;
+    final String schedule;
+    final DateTime checkInTime;
+    final String location;
 
     Data({
         required this.id,
-        required this.username,
-        required this.email,
-        required this.firstName,
-        required this.lastName,
-        required this.role,
-        required this.phone,
+        required this.schedule,
+        required this.checkInTime,
+        required this.location,
     });
 
     factory Data.fromRawJson(String str) => Data.fromJson(json.decode(str));
@@ -57,21 +51,15 @@ class Data {
 
     factory Data.fromJson(Map<String, dynamic> json) => Data(
         id: json["id"],
-        username: json["username"],
-        email: json["email"],
-        firstName: json["first_name"],
-        lastName: json["last_name"],
-        role: json["role"],
-        phone: json["phone"],
+        schedule: json["schedule"],
+        checkInTime: DateTime.parse(json["check_in_time"]),
+        location: json["location"],
     );
 
     Map<String, dynamic> toJson() => {
         "id": id,
-        "username": username,
-        "email": email,
-        "first_name": firstName,
-        "last_name": lastName,
-        "role": role,
-        "phone": phone,
+        "schedule": schedule,
+        "check_in_time": checkInTime.toIso8601String(),
+        "location": location,
     };
 }

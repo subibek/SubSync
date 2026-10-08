@@ -33,7 +33,7 @@ class _MainScreenState extends State<MainScreen> {
               destinations: const <Widget>[
                 NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
                 NavigationDestination(icon: Icon(Icons.calendar_month), label: 'Schedule'),
-                NavigationDestination(icon: Icon(Icons.design_services), label: 'Services'),
+                NavigationDestination(icon: Icon(Icons.design_services), label: 'Invoice'),
                 NavigationDestination(icon: Icon(Icons.person), label: 'Profile'),
               ]
             ),

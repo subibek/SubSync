@@ -23,6 +23,10 @@ class ScheduleService {
           }
         )
       );
+
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setString('userSchedule', jsonEncode(response.data));
+
       return AllScheduleModel.fromJson(response.data);
 
     }
@@ -54,7 +58,7 @@ class ScheduleService {
     }
     on DioException catch(e){
       if(e.response != null){
-        print (e.response!.data['message']);
+        // print (e.response!.data['message']);
         return null;
       }
       return null;

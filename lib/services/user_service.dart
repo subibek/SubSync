@@ -60,6 +60,53 @@ class UserService {
 
   } 
 
+  static Future<String?> updateUserInfo(UserInfoModel currentUserInfo, String firstname, String lastname, String number) async {
+    const String url = "http://10.0.2.2:8000/api/v1/user/user-detail/";
+    try{
+      Response response = await dio.put(
+        url,
+        options: Options(
+          headers: {
+            'Authorization' : 'Bearer ${UserTokenService.accessToken}',
+          }
+        ),
+        data: {
+          "first_name": firstname,
+          "last_name": lastname,
+          "phone": number
+        }
+      );
+
+      if(response.statusCode == 200){
+
+        currentUserInfo.data.firstName = response.data['data']['first_name'];
+        currentUserInfo.data.lastName = response.data['data']['last_name'];  
+        currentUserInfo.data.phone = response.data['data']['phone']; 
+
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString("currentUserInfo", jsonEncode(currentUserInfo));
+
+        ProfileInfoScreen.firstNameController.text = currentUserInfo.data.firstName;
+        ProfileInfoScreen.lastNameController.text = currentUserInfo.data.lastName;
+        ProfileInfoScreen.phoneNumberController.text = currentUserInfo.data.phone;
+
+        return "Success";
+      } else {
+        return null;
+      }
+
+
+    } on DioException catch(e){
+
+      if (e.response != null){
+        (e.response!.data['message']);
+        return null;
+      }
+      return null;
+    }
+
+  }
+
 
   static Future<String> getUserInfo() async {
     
@@ -80,6 +127,9 @@ class UserService {
         Map<String, dynamic> data = response.data;
 
         UserInfoModel userInfo = UserInfoModel.fromJson(data);
+
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString("currentUserInfo", jsonEncode(userInfo));
 
         ProfileInfoScreen.usernameController.text = userInfo.data.username;
         ProfileInfoScreen.firstNameController.text = userInfo.data.firstName;

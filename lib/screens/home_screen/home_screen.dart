@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:subsync/blocs/theme_bloc.dart';
+import 'package:subsync/models/schedule_model.dart';
+import 'package:subsync/services/schedule_service.dart';
 import 'package:subsync/utils/colors.dart';
 import 'package:subsync/utils/route/route_names.dart';
 import 'package:subsync/widgets/custom_list_tile.dart';
@@ -14,6 +16,17 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+
+  @override
+  void initState() {
+    loadUserSchedule();
+    super.initState();
+  }
+
+  void loadUserSchedule() async {
+    await ScheduleService.getUserSchedule();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
