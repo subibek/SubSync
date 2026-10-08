@@ -10,7 +10,7 @@ import 'package:subsync/screens/notification_screen.dart';
 import 'package:subsync/screens/profile_screen/help_center_screen.dart';
 import 'package:subsync/screens/profile_screen/profile_faq_screen.dart';
 import 'package:subsync/screens/profile_screen/profile_screen.dart';
-import 'package:subsync/screens/profile_screen/profile_settings_screen.dart';
+import 'package:subsync/screens/profile_screen/profile_screen.dart';
 import 'package:subsync/screens/profile_screen/sub_screens/appearance_mode_screen.dart';
 import 'package:subsync/screens/profile_screen/sub_screens/notification_settings_screen.dart';
 import 'package:subsync/screens/profile_screen/sub_screens/profile_info_screen.dart';
@@ -94,10 +94,6 @@ class AppRoutes {
                 path: RouteNames.profileScreen,
                 builder: (context, state) => const ProfileScreen(), 
                 routes: [
-                  GoRoute(
-                    path: RouteNames.profileSettingsScreen,
-                    builder: (context, state) => const ProfileSettingsScreen(), 
-                    routes: [
                       GoRoute(
                         path: RouteNames.profileInfoScreen,
                         builder: (context, state) {
@@ -131,8 +127,6 @@ class AppRoutes {
                         ]
                       ),
                     ]
-                  )
-                ]
               )
             ] 
           )

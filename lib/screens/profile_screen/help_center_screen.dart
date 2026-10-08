@@ -33,7 +33,7 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
                 textFontWeight: SubSyncTextStyles.bold, 
                 subtitle: 'Commonly asked questions from our users.',
                 onTap: (){
-                  context.push('${RouteNames.profileScreen}${RouteNames.profileSettingsScreen}${RouteNames.helpCenterScreen}${RouteNames.faqScreen}');
+                  context.push('${RouteNames.profileScreen}${RouteNames.helpCenterScreen}${RouteNames.faqScreen}');
                 }, trailingWidget: null, 
               ),
 
