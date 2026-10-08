@@ -7,6 +7,7 @@ import 'package:subsync/models/clock_in_model.dart';
 import 'package:subsync/models/schedule_model.dart';
 import 'package:subsync/services/user_token_service.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:collection/collection.dart';
 
 
 class LocationService {
@@ -69,7 +70,7 @@ class LocationService {
     try{
 
       String? scheduleId = await getScheduleId(siteAddress);
-      if(scheduleId.isEmpty){ return "No schedule found for this site";}
+      if(scheduleId == "No Schedule"){ return "No schedule found for this site";}
 
       Response response = await dio.post(
         url,
@@ -108,7 +109,7 @@ class LocationService {
     Future<String> clockOut(String siteAddress, String? completionNotes, List? images) async {
 
       String? scheduleId = await getScheduleId(siteAddress);
-      if(scheduleId.isEmpty){ return "No schedule found for this site";}
+      if(scheduleId == "No Schedule"){ return "No schedule found for this site";}
 
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final clockInDetails = prefs.getString(scheduleId);
@@ -154,15 +155,12 @@ class LocationService {
 
     AllScheduleModel allSchedule = AllScheduleModel.fromJson(jsonDecode(userSchedule!));
 
-    ScheduleModel schedule = allSchedule.data.results.firstWhere((item) {
-      return 
+    ScheduleModel? schedule = allSchedule.data.results.firstWhereOrNull((item) =>
         item.site.address == siteAddress 
         && isSameDay(item.scheduledDate, DateTime.now())
-        && item.status == "SCHEDULED";
-    } 
-    
+        && item.status == "SCHEDULED",
     );
-
+    if(schedule == null) return "No Schedule";
     return schedule.id;
   }
 
