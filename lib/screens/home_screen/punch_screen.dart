@@ -9,6 +9,7 @@ import 'package:subsync/utils/colors.dart';
 import 'package:subsync/utils/text_theme.dart';
 import 'package:subsync/widgets/custom_button.dart';
 import 'package:subsync/widgets/custom_error_message.dart';
+import 'package:geocoding/geocoding.dart';
 
 class PunchScreen extends StatefulWidget {
   const PunchScreen({super.key});
@@ -25,6 +26,7 @@ class _PunchScreenState extends State<PunchScreen> with SingleTickerProviderStat
   bool showCircularProgressIndicator = false;
   bool? isClockInSuccess;
   String message = '';
+  AllSitesModel? allSites;
 
   late AnimationController animationController;
 
@@ -48,11 +50,11 @@ class _PunchScreenState extends State<PunchScreen> with SingleTickerProviderStat
 
   initializeDropdownMenuItems() async {
 
-    AllSitesModel? allSites = await SiteService.getAllSites();
+    allSites = await SiteService.getAllSites();
 
     if(allSites != null){
       dropdownMenuItems = [];
-      for(final site in allSites.data.results)
+      for(final site in allSites!.data.results)
         {
           dropdownMenuItems.add(DropdownMenuItem(value: site.address, alignment: AlignmentGeometry.center, child: Text(site.name)));
         }
@@ -134,26 +136,29 @@ class _PunchScreenState extends State<PunchScreen> with SingleTickerProviderStat
                       ),
                       child: AspectRatio(
                         aspectRatio: 4/4,
-                        child: Center(
-                          child: 
-                          showCircularProgressIndicator 
-                          ? SizedBox.shrink()
-                          : Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  TimeOfDay.now().format(context),
-                                  style: Theme.of(context).textTheme.textXl.copyWith(fontWeight: SubSyncTextStyles.bold),
-                                ),
-                               (isClockInSuccess != null) 
-                               ? Text(
-                                   message,
-                                   textAlign: TextAlign.center,
-                                    style: Theme.of(context).textTheme.text2xl.copyWith(fontWeight: SubSyncTextStyles.bold),
-                                  )
-                                : SizedBox.shrink()
-                              ],
-                            )
+                        child: Padding(
+                          padding: const EdgeInsets.all(4),
+                          child: Center(
+                            child: 
+                            showCircularProgressIndicator 
+                            ? SizedBox.shrink()
+                            : Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    TimeOfDay.now().format(context),
+                                    style: Theme.of(context).textTheme.textXl.copyWith(fontWeight: SubSyncTextStyles.bold),
+                                  ),
+                                 (isClockInSuccess != null) 
+                                 ? Text(
+                                     message,
+                                     textAlign: TextAlign.center,
+                                      style: Theme.of(context).textTheme.text2xl.copyWith(fontWeight: SubSyncTextStyles.bold),
+                                    )
+                                  : SizedBox.shrink()
+                                ],
+                              )
+                          ),
                         ),
                       ),
                     )
@@ -167,20 +172,31 @@ class _PunchScreenState extends State<PunchScreen> with SingleTickerProviderStat
                   
                   setState(() => showCircularProgressIndicator = true);
                   
+                  final location = allSites!.data.results.firstWhere((site)=> site.address == dropdownValue);
+
+                  print('The selected address is ${location.address}');
+
+                  Geocoding geo = Geocoding();
+                  final longAndLat = await geo.locationFromAddress(location.address);  
+
+                  print('The long and Lat for the address are ${longAndLat.first.latitude} and ${longAndLat.first.longitude}');
                   final locationService = LocationService(
-                    siteLatitude: 37.4219983, 
-                    siteLongitude: -122.084, 
+                    siteLatitude: longAndLat.first.latitude, 
+                    siteLongitude: longAndLat.first.longitude, 
                     allowRadiusMeters: 100
                   );
+                  
 
                   final result = await locationService.canClockIn(dropdownValue);
                   if(result == "Success") {
                     if(animationController.isAnimating) animationController.stop();
-                    setState(() {
+                    if(mounted) {
+                      setState(() {
                       showCircularProgressIndicator = false;
                       isClockInSuccess = true;
                       message = "Clocked in successfully";
                     });
+                    }
                   } else {
                       if(animationController.isAnimating) animationController.stop();
                     setState(() {

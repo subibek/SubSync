@@ -44,6 +44,9 @@ class LocationService {
       return "Denied. No location service.";
     }
 
+    String? scheduleId = await getScheduleId(siteAddress);
+      if(scheduleId == "No Schedule"){ return "No schedule found for this site for this day.";}
+
     final position = await Geolocator.getCurrentPosition(
       locationSettings: const LocationSettings(accuracy: LocationAccuracy.high)
     );
@@ -57,20 +60,16 @@ class LocationService {
     );
 
     if(distance <= allowRadiusMeters) {
-
-      final result = await clockIn(siteAddress);
+      final result = await clockIn(siteAddress, scheduleId);
       return result;
     } else {
-      return "Denied: you are ${distance.toStringAsFixed(0)}m from site.";
+      return "Denied: you are ${(distance/1000).toStringAsFixed(0)} km from location.";
     }
   }
 
-  Future<String> clockIn(String siteAddress) async {
+  Future<String> clockIn(String siteAddress, String scheduleId) async {
     const String url = "http://10.0.2.2:8000/api/v1/user/clock-in/";
     try{
-
-      String? scheduleId = await getScheduleId(siteAddress);
-      if(scheduleId == "No Schedule"){ return "No schedule found for this site";}
 
       Response response = await dio.post(
         url,
@@ -109,7 +108,7 @@ class LocationService {
     Future<String> clockOut(String siteAddress, String? completionNotes, List? images) async {
 
       String? scheduleId = await getScheduleId(siteAddress);
-      if(scheduleId == "No Schedule"){ return "No schedule found for this site";}
+      if(scheduleId == "No Schedule"){ return "No schedule found for this site for this day.";}
 
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final clockInDetails = prefs.getString(scheduleId);

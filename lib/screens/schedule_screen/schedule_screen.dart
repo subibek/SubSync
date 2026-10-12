@@ -6,6 +6,7 @@ import 'package:subsync/models/schedule_model.dart';
 import 'package:subsync/screens/home_screen/home_screen.dart';
 import 'package:subsync/services/schedule_service.dart';
 import 'package:subsync/utils/border_radius.dart';
+import 'package:subsync/utils/colors.dart';
 import 'package:subsync/utils/text_theme.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -58,46 +59,77 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Center(
-          child: Column(
-            children: [
-              TableCalendar(
-                focusedDay: DateTime.now(), 
-                firstDay: DateTime.utc(2010, 10, 10), 
-                lastDay: DateTime.utc(2030, 10, 10),
-                eventLoader: (day){
-                  return scheduleDates.where((item){
-                    return isSameDay(item['date'], day);
-                  }).toList();
-                },
+        body: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Center(
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(SubSyncBorderRadius.radiusLg),
+                    border: Border.all(color: themeBloc.isDarkMode ? SubSyncColors.gray70: SubSyncColors.gray30)
+                  ),
+                  child: TableCalendar(
+                    focusedDay: DateTime.now(), 
+                    firstDay: DateTime.utc(2010, 10, 10), 
+                    lastDay: DateTime.utc(2030, 10, 10),
+                    eventLoader: (day){
+                      return scheduleDates.where((item){
+                        return isSameDay(item['date'], day);
+                      }).toList();
+                    },
+                  
+                    onDaySelected: (selectedDay, focusedDay) {
+                      if(scheduleDates.any((item)=> isSameDay(item['date'],selectedDay)))
+                      {showScheduleDetailsDialog(selectedDay);}
+                    },
+                  
+                    calendarBuilders: CalendarBuilders(
+                      markerBuilder: (context, day, events) {
+                        if(events.isNotEmpty) {
+                          return Positioned(
+                            bottom: 0,
+                            child: Container(
+                              width: 20,
+                              height: 4,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(SubSyncBorderRadius.radiusLg),
+                                color: themeBloc.currentColor
+                              ),
+                            )
+                          );
+                        } 
+                      },
+                    ),
+                    daysOfWeekStyle: DaysOfWeekStyle(
+                      weekdayStyle: Theme.of(context).textTheme.paragraphSm.copyWith(fontWeight: SubSyncTextStyles.bold, color:  themeBloc.isDarkMode ? SubSyncColors.gray30 : SubSyncColors.gray90),
+                      weekendStyle: Theme.of(context).textTheme.paragraphSm.copyWith(fontWeight: SubSyncTextStyles.bold, color:  themeBloc.isDarkMode ? SubSyncColors.gray30 : SubSyncColors.gray90),
+                    ),
+                    
+                    calendarStyle: CalendarStyle(
+                      outsideDaysVisible: false,
+                      defaultTextStyle: Theme.of(context).textTheme.paragraphSm.copyWith(fontWeight: SubSyncTextStyles.medium, color:  themeBloc.isDarkMode ? SubSyncColors.gray40 : SubSyncColors.gray80),
+                      weekendTextStyle: Theme.of(context).textTheme.paragraphSm.copyWith(fontWeight: SubSyncTextStyles.medium, color:  themeBloc.isDarkMode ? SubSyncColors.gray40 : SubSyncColors.gray80),
+                      todayTextStyle: TextStyle(color: themeBloc.currentColor),
+                      todayDecoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: themeBloc.isDarkMode ? SubSyncColors.gray70.withValues(alpha: 0.8) : SubSyncColors.gray30
+                      )
+                    ),
 
-                onDaySelected: (selectedDay, focusedDay) {
-                  if(scheduleDates.any((item)=> isSameDay(item['date'],selectedDay)))
-                  {showScheduleDetailsDialog(selectedDay);}
-                },
-
-                calendarBuilders: CalendarBuilders(
-                  markerBuilder: (context, day, events) {
-                    if(events.isNotEmpty) {
-                      return Positioned(
-                        bottom: 4,
-                        child: Container(
-                          width: 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: themeBloc.currentColor
-                          ),
-                        )
-                      );
-                    } 
-                  },
-                ),
-                onFormatChanged: (onChanged){
-                },
-              )
-            ],
-          )
+                    headerStyle: HeaderStyle(
+                      titleCentered: true,
+                      formatButtonVisible: false,
+                      titleTextStyle: Theme.of(context).textTheme.paragraphLg.copyWith(fontWeight: SubSyncTextStyles.bold)
+                    ),
+                    // onFormatChanged: (onChanged){
+                    // },
+                  ),
+                )
+              ],
+            )
+          ),
         ),
     );
   }
