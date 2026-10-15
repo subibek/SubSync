@@ -174,12 +174,9 @@ class _PunchScreenState extends State<PunchScreen> with SingleTickerProviderStat
                   
                   final location = allSites!.data.results.firstWhere((site)=> site.address == dropdownValue);
 
-                  print('The selected address is ${location.address}');
-
                   Geocoding geo = Geocoding();
                   final longAndLat = await geo.locationFromAddress(location.address);  
 
-                  print('The long and Lat for the address are ${longAndLat.first.latitude} and ${longAndLat.first.longitude}');
                   final locationService = LocationService(
                     siteLatitude: longAndLat.first.latitude, 
                     siteLongitude: longAndLat.first.longitude, 

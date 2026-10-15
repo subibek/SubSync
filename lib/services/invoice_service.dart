@@ -65,8 +65,12 @@ class InvoiceService {
     
     String url = 'http://10.0.2.2:8000/api/v1/user/invoices/';
     
-    if(invoiceDate != null) url = '$url?invoice_date=$invoiceDate';
-    if(status != null) url = '$url&status=${status!.toUpperCase()}'; 
+    if(invoiceDate != null) url = '$url?invoice_date=$invoiceDate'; 
+    if(status != null){
+      if(invoiceDate == null) {url = '$url?status=${status.toUpperCase()}';}
+      else {url = '$url&status=${status.toUpperCase()}';}
+    } 
+
 
     try{
       final response = await dio.get(

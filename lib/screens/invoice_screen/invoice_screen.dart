@@ -29,14 +29,13 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
     {'title': 'Rejected', 'icon' : 'assets/icons/X.svg'},
     ]; 
   String? selectedWorkStatusFilter;
-  ValueNotifier<DateTime?> dateFilterValue = ValueNotifier<DateTime?>(DateTime.now()); 
+  ValueNotifier<DateTime?> dateFilterValue = ValueNotifier<DateTime?>(null); 
 
   Future<InvoiceListModel?> invoiceList = InvoiceService.getInvoicesList();
 
   @override
   void initState() {
     // TODO: implement initState
-    dateFilterValue.value = DateTime.now();
     super.initState();
   }
 
@@ -127,7 +126,11 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                 child: CustomButton(onTap: (){
                   setState(() {
                     context.pop();
-                    invoiceList = InvoiceService.getInvoicesListWithFilter(DateFormat('yyyy-MM-dd').format(dateFilterValue.value!), selectedWorkStatusFilter);
+                    
+                    invoiceList = InvoiceService.getInvoicesListWithFilter(  
+                      (dateFilterValue.value != null) ? DateFormat('yyyy-MM-dd').format(dateFilterValue.value!) : null, 
+                      selectedWorkStatusFilter
+                    );
                   });
                 }, outlinedBorder: false, title: "Apply Filter"),
               )
@@ -140,7 +143,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                 child: SvgPicture.asset('assets/icons/CalendarBlank.svg')),
               const SizedBox(width: 5),
               Text(
-                'This Week',
+                'Filter',
                 style: Theme.of(context).textTheme.textSm.copyWith(fontWeight: SubSyncTextStyles.medium),
               ),
               const SizedBox(width: 5),
@@ -255,9 +258,10 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
               
                   return GestureDetector(
                         onTap: (){
-                          setState(() {
-                            selectedWorkStatusFilter = option['title'];
-                          });
+                          if(selectedWorkStatusFilter == option['title']){
+                            setState(()=> selectedWorkStatusFilter = null);
+                          } else
+                          {setState(() => selectedWorkStatusFilter = option['title']);}
                         },
                         child: IntrinsicWidth(
                           child: Padding(
@@ -338,7 +342,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                       valueListenable: dateFilterValue,
                       builder: (context, value, child) {
                         return Text(
-                          DateFormat('dd / MM / yyy').format(dateFilterValue.value ?? DateTime.now()),
+                          (dateFilterValue.value != null) ? DateFormat('dd / MM / yyy').format(dateFilterValue.value!) : '',
                           style: Theme.of(context).textTheme.textMd.copyWith(
                             color: themeBloc.isDarkMode ? SubSyncColors.gray30 : SubSyncColors.gray60
                             ),
@@ -383,7 +387,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
         );
       },
       firstDate: DateTime(date.year - 100), 
-      initialDate: date,
+      initialDate: null,
       lastDate: DateTime(date.year + 10)
     );
   }

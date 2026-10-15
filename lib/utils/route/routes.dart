@@ -5,6 +5,7 @@ import 'package:subsync/screens/authentication_screens/forgot_password.dart';
 import 'package:subsync/screens/authentication_screens/sign_in_screen.dart';
 import 'package:subsync/screens/home_screen/home_screen.dart';
 import 'package:subsync/screens/home_screen/punch_screen.dart';
+import 'package:subsync/screens/home_screen/work_screen.dart';
 import 'package:subsync/screens/main_screen.dart';
 import 'package:subsync/screens/notification_screen.dart';
 import 'package:subsync/screens/profile_screen/help_center_screen.dart';
@@ -57,6 +58,10 @@ class AppRoutes {
                 path: RouteNames.homeScreen,
                 builder: (context, state) => const HomeScreen(), 
                 routes: [
+                  GoRoute(
+                    path: RouteNames.workScreen,
+                    builder: (context, state) => const WorkScreen(), 
+                  ),
                   GoRoute(
                     path: RouteNames.punchScreen,
                     builder: (context, state) => const PunchScreen(), 

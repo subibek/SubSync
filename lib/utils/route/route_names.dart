@@ -19,4 +19,5 @@ class RouteNames {
   static const helpCenterScreen = '/helpCenterScreen';
   static const faqScreen = '/faqScreen';
   static const profileInfoScreen = '/profileInfo';
+  static const workScreen = '/work';
 }

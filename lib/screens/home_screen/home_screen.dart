@@ -61,9 +61,25 @@ class _HomeScreenState extends State<HomeScreen> {
                   Expanded(
                     child: CustomListTile(
                       onTap: () {},
-                      child: Center(child: Text('My Invoices', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600))),
+                      child: Center(child: Text('Invoices', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600))),
                     ),
                   )
+                ],
+              ),
+              const SizedBox(height: 10),
+              Row(
+                spacing: 5,
+                children: [
+                  Expanded(
+                    child: CustomListTile(
+                      color: themeBloc.isDarkMode ? SubSyncColors.gray80 : SubSyncColors.gray20,
+                      onTap: () => context.go('${RouteNames.homeScreen}${RouteNames.workScreen}'),
+                      child: Center(child: Text('Work', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600))),
+                    ),
+                  ),
+                  Expanded(
+                    child: SizedBox.shrink()
+)
                 ],
               )
             ],
