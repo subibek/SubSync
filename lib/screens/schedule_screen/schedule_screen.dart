@@ -41,11 +41,14 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
 
       allSchedule = await ScheduleService.getUserSchedule();
 
+      print("this is all schedule in schedule screen ${allSchedule!.data.results.length}");
+
       if(allSchedule == null){
         setState(() {
           _error = "Schedule returned empty.";
         });  
       } else {
+        allSchedule!.data.results.removeWhere((schedule) => schedule.status == "CANCELLED");
         final dates = allSchedule!.data.results.map((item)=>{ "id": item.id, "date" :item.scheduledDate}).toList();
         setState(()=> scheduleDates = dates);
       }

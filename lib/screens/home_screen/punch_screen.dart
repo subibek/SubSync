@@ -1,15 +1,26 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
+import 'package:image_cropper/image_cropper.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:location/location.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:subsync/blocs/theme_bloc.dart';
 import 'package:subsync/models/site_model.dart';
+import 'package:subsync/services/geo_cache_service.dart';
 import 'package:subsync/services/location_service.dart';
 import 'package:subsync/services/site_service.dart';
+import 'package:subsync/utils/border_radius.dart';
 import 'package:subsync/utils/colors.dart';
 import 'package:subsync/utils/text_theme.dart';
 import 'package:subsync/widgets/custom_button.dart';
 import 'package:subsync/widgets/custom_error_message.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:path/path.dart' as p;
+import 'package:subsync/widgets/custom_text_field.dart';
 
 class PunchScreen extends StatefulWidget {
   const PunchScreen({super.key});
@@ -29,6 +40,10 @@ class _PunchScreenState extends State<PunchScreen> with SingleTickerProviderStat
   AllSitesModel? allSites;
 
   late AnimationController animationController;
+  final ImagePicker _picker = ImagePicker();
+  File? imageUrl;
+  TextEditingController completionNotesController = TextEditingController();
+  bool isAddImagesButtonDiasabled = false;
 
   @override
   void initState() {
@@ -174,69 +189,280 @@ class _PunchScreenState extends State<PunchScreen> with SingleTickerProviderStat
                   
                   final location = allSites!.data.results.firstWhere((site)=> site.address == dropdownValue);
 
-                  Geocoding geo = Geocoding();
-                  final longAndLat = await geo.locationFromAddress(location.address);  
+                  final geoCache = GeoCacheService();
 
+                  final coords = await geoCache.getLatLng(location.address);
+                  if (coords != null) {
                   final locationService = LocationService(
-                    siteLatitude: longAndLat.first.latitude, 
-                    siteLongitude: longAndLat.first.longitude, 
-                    allowRadiusMeters: 100
-                  );
-                  
+                        siteLatitude: coords[0], 
+                        siteLongitude: coords[1], 
+                        allowRadiusMeters: 100
+                      );
+                      
 
-                  final result = await locationService.canClockIn(dropdownValue);
-                  if(result == "Success") {
-                    if(animationController.isAnimating) animationController.stop();
-                    if(mounted) {
-                      setState(() {
-                      showCircularProgressIndicator = false;
-                      isClockInSuccess = true;
-                      message = "Clocked in successfully";
-                    });
-                    }
+                      final result = await locationService.canClockIn(dropdownValue);
+                      if(result == "Success") {
+                        if(animationController.isAnimating) animationController.stop();
+                        if(mounted) {
+                          setState(() {
+                          showCircularProgressIndicator = false;
+                          isClockInSuccess = true;
+                          message = "Clocked in successfully";
+                        });
+                        }
+                      } else {
+                          if(animationController.isAnimating) animationController.stop();
+                        setState(() {
+                          showCircularProgressIndicator = false;
+                          isClockInSuccess = false;
+                          message = result;
+                        });
+                      }
                   } else {
-                      if(animationController.isAnimating) animationController.stop();
-                    setState(() {
-                      showCircularProgressIndicator = false;
-                      isClockInSuccess = false;
-                      message = result;
-                    });
-                  }
+                          if(animationController.isAnimating) animationController.stop();
+                        setState(() {
+                          showCircularProgressIndicator = false;
+                          isClockInSuccess = false;
+                        });
+                      }
                 }, 
                 outlinedBorder: true
               ),
               const SizedBox(height: 10),
               CustomButton(onTap: () async {
                 animationController.repeat();
-                  
+                                  
                   setState(() => showCircularProgressIndicator = true);
-                  
-                  final locationService = LocationService(
-                    siteLatitude: 37.4219983, 
-                    siteLongitude: -122.084, 
+
+                  final geoCache = GeoCacheService();
+
+                   final location = allSites!.data.results.firstWhere((site)=> site.address == dropdownValue);
+
+                  final coords = await geoCache.getLatLng(location.address);
+                  if (coords != null) {
+                    final locationService = LocationService(
+                    siteLatitude: coords[0], 
+                    siteLongitude: coords[1], 
                     allowRadiusMeters: 100
                   );
 
-                  final result = await locationService.clockOut(dropdownValue,null,null);
-                  if(result == "Success") {
-                    if(animationController.isAnimating) animationController.stop();
-                    setState(() {
-                      showCircularProgressIndicator = false;
-                      isClockInSuccess = true;
-                      message = "Clocked out successfully";
-                    });
-                  } else {
-                      if(animationController.isAnimating) animationController.stop();
-                    setState(() {
-                      showCircularProgressIndicator = false;
-                      isClockInSuccess = false;
-                      message = result;
-                    });
+                  final canClockOut = await locationService.canClockOut(dropdownValue);
+                  if(canClockOut == "True"){
+                    showClockOutDialog(locationService);
                   }
+                  else {
+                        if(animationController.isAnimating) animationController.stop();
+                      setState(() {
+                        showCircularProgressIndicator = false;
+                        isClockInSuccess = false;
+                        message = canClockOut;
+                      });
+                    }
+                  }
+                  
+                  else {
+                        if(animationController.isAnimating) animationController.stop();
+                      setState(() {
+                        showCircularProgressIndicator = false;
+                        isClockInSuccess = false;
+                        message = "Could Not Clock Out";
+                      });
+                    }
+                  
               }, outlinedBorder: true, title: 'Clock Out',)
             ],
           ),
         )
     );
+  }
+
+
+  void showClockOutDialog(LocationService locationService) {
+
+    imageUrl = null;
+
+    showDialog(
+      barrierColor: themeBloc.isDarkMode ? Colors.black.withValues(alpha: 0.8): SubSyncColors.gray10.withValues(alpha: 0.4),
+      context: context, 
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          return Dialog(
+            backgroundColor: themeBloc.isDarkMode ? SubSyncColors.gray90: SubSyncColors.gray10,
+            insetPadding: EdgeInsets.all(30),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.circular(SubSyncBorderRadius.radius2xl)),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 30),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Completion Notes:'),
+                  CustomTextField(
+                    controller: completionNotesController, 
+                    hintText: 'Completion Notes..',
+                    keyboardType: TextInputType.multiline,
+                    minLines: 4,
+                    maxLines: 6,
+                    contentPadding: const EdgeInsets.all(15),
+                  ),
+                  const SizedBox(height: 10),
+                  if (imageUrl == null)
+                   CustomButton(
+                      title: 'Add Images',
+                      width: 150,
+                      onTap: () async {
+                        final picked = await selectImages(dialogContext);
+                        if(picked != null){
+                          setDialogState(() => imageUrl = picked);
+                        }
+                      }, 
+                      outlinedBorder: true
+                    )
+                  else Text('Image ${p.basename(imageUrl!.path)} uploaded.'),
+                  const SizedBox(height: 10),
+                  CustomButton(
+                    title: 'Submit',
+                    onTap: () async {
+
+                    final result = await locationService.clockOut(dropdownValue,null,[imageUrl]);
+                      if(result == "Success") {
+                        if(animationController.isAnimating) animationController.stop();
+                        setState(() {
+                          showCircularProgressIndicator = false;
+                          isClockInSuccess = true;
+                          message = "Clocked out successfully";
+                        });
+                      } else {
+                        setState(() {
+                          message = result;
+                        });
+                      } 
+                          Navigator.of(dialogContext).pop();
+
+              
+                    }, 
+                    outlinedBorder: false
+                  )
+                ],
+              ),
+            )
+          );
+        }
+      )
+    );
+  }
+
+
+  void clockInWithGeoCoding (dynamic location) async {
+     Geocoding geo = Geocoding();
+        final longAndLat = await geo.locationFromAddress(location.address);
+
+        final locationService = LocationService(
+          siteLatitude: longAndLat.first.latitude, 
+          siteLongitude: longAndLat.first.longitude, 
+          allowRadiusMeters: 100
+        );
+        
+
+        final result = await locationService.canClockIn(dropdownValue);
+        if(result == "Success") {
+          if(animationController.isAnimating) animationController.stop();
+          if(mounted) {
+            setState(() {
+            showCircularProgressIndicator = false;
+            isClockInSuccess = true;
+            message = "Clocked in successfully";
+          });
+          }
+        } else {
+            if(animationController.isAnimating) animationController.stop();
+          setState(() {
+            showCircularProgressIndicator = false;
+            isClockInSuccess = false;
+            message = result;
+          });
+        }
+  }
+
+    Future<File?> selectImages(BuildContext bottomSheetContext) async {
+
+    final source = await showModalBottomSheet(
+      context: bottomSheetContext, 
+      useRootNavigator: true,
+      enableDrag: false,
+      showDragHandle: false,
+      builder: (context) => BottomSheet(
+      onClosing: (){},
+      builder: (sheetContext) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [ 
+          SizedBox(height: 10),
+          ListTile(
+            leading: Icon(Icons.camera),
+            title: Text('Camera'),
+            onTap: (){
+              Navigator.of(sheetContext).pop(ImageSource.camera);
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.image_search_outlined),
+            title: Text('Gallery'),
+            onTap: (){
+              Navigator.of(sheetContext).pop(ImageSource.gallery);
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.cancel),
+            title: Text('Cancel'),
+            onTap: (){
+              Navigator.of(sheetContext).pop();
+              // Navigator.pop(context);
+            },
+          ),
+        ],
+      )
+      )
+      );
+
+      if(source == null) return null;
+      return _pickImage(source);
+  }
+
+  Future<File?> _pickImage(ImageSource source) async {
+    
+      final pickedFile = await _picker.pickImage(source: source, imageQuality: 50);
+
+    if (pickedFile == null){
+      return null;
+    }
+
+      ImageCropper cropper = ImageCropper();
+    var file = await cropper.cropImage(
+      sourcePath: pickedFile.path,
+      );
+
+    if (file == null){
+      return null;
+    }
+
+    String compressedImage = await compressImage(file.path,44);
+
+    // setState(() {
+    //   imageUrl = File(compressedImage);
+    // });
+
+    return File(compressedImage);
+  }
+
+   Future<String> compressImage(String path, int quality) async {
+      final newPath = p.join((await getTemporaryDirectory()).path, '${DateTime.now().millisecondsSinceEpoch}${p.extension(path)}');
+
+      final result = await FlutterImageCompress.compressAndGetFile(
+        path,
+        newPath,
+        quality: quality
+        );
+
+      return result!.path;
   }
 }

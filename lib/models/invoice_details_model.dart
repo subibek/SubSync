@@ -39,6 +39,7 @@ class Data {
     final DateTime invoiceDate;
     final DateTime servicePeriodStart;
     final DateTime servicePeriodEnd;
+    final bool gst;
     final String amount;
     final String remarks;
     final String status;
@@ -53,6 +54,7 @@ class Data {
         required this.invoiceDate,
         required this.servicePeriodStart,
         required this.servicePeriodEnd,
+        required this.gst,
         required this.amount,
         required this.remarks,
         required this.status,
@@ -72,6 +74,7 @@ class Data {
         invoiceDate: DateTime.parse(json["invoice_date"]),
         servicePeriodStart: DateTime.parse(json["service_period_start"]),
         servicePeriodEnd: DateTime.parse(json["service_period_end"]),
+        gst: json["gst"],
         amount: json["amount"],
         remarks: json["remarks"],
         status: json["status"],
@@ -87,6 +90,7 @@ class Data {
         "invoice_date": "${invoiceDate.year.toString().padLeft(4, '0')}-${invoiceDate.month.toString().padLeft(2, '0')}-${invoiceDate.day.toString().padLeft(2, '0')}",
         "service_period_start": "${servicePeriodStart.year.toString().padLeft(4, '0')}-${servicePeriodStart.month.toString().padLeft(2, '0')}-${servicePeriodStart.day.toString().padLeft(2, '0')}",
         "service_period_end": "${servicePeriodEnd.year.toString().padLeft(4, '0')}-${servicePeriodEnd.month.toString().padLeft(2, '0')}-${servicePeriodEnd.day.toString().padLeft(2, '0')}",
+        "gst": gst,
         "amount": amount,
         "remarks": remarks,
         "status": status,

@@ -3,6 +3,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:subsync/blocs/theme_bloc.dart';
 import 'package:subsync/models/schedule_model.dart';
+import 'package:subsync/services/dashboard_service.dart';
 import 'package:subsync/services/schedule_service.dart';
 import 'package:subsync/utils/colors.dart';
 import 'package:subsync/utils/route/route_names.dart';
@@ -19,12 +20,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void initState() {
-    loadUserSchedule();
+    loadUserServices();
     super.initState();
   }
 
-  void loadUserSchedule() async {
+  void loadUserServices() async {
     await ScheduleService.getUserSchedule();
+    await DashboardService.getDashboard();
   }
 
   @override
@@ -60,28 +62,35 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   Expanded(
                     child: CustomListTile(
-                      onTap: () {},
-                      child: Center(child: Text('Invoices', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600))),
-                    ),
-                  )
-                ],
-              ),
-              const SizedBox(height: 10),
-              Row(
-                spacing: 5,
-                children: [
-                  Expanded(
-                    child: CustomListTile(
                       color: themeBloc.isDarkMode ? SubSyncColors.gray80 : SubSyncColors.gray20,
                       onTap: () => context.go('${RouteNames.homeScreen}${RouteNames.workScreen}'),
                       child: Center(child: Text('Work', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600))),
                     ),
                   ),
-                  Expanded(
-                    child: SizedBox.shrink()
-)
+                  // Expanded(
+                  //   child: CustomListTile(
+                  //     onTap: () {},
+                  //     child: Center(child: Text('Invoices', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600))),
+                  //   ),
+                  // )
                 ],
-              )
+              ),
+              const SizedBox(height: 10),
+//               Row(
+//                 spacing: 5,
+//                 children: [
+//                   Expanded(
+//                     child: CustomListTile(
+//                       color: themeBloc.isDarkMode ? SubSyncColors.gray80 : SubSyncColors.gray20,
+//                       onTap: () => context.go('${RouteNames.homeScreen}${RouteNames.workScreen}'),
+//                       child: Center(child: Text('Work', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600))),
+//                     ),
+//                   ),
+//                   Expanded(
+//                     child: SizedBox.shrink()
+// )
+//                 ],
+//               )
             ],
           ),
         )

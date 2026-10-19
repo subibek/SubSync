@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:subsync/models/clock_in_model.dart';
@@ -22,6 +23,7 @@ class LocationService {
     required this.allowRadiusMeters
   });
 
+  
   Dio dio = Dio();
 
   Future<bool> ensurePermission() async {
@@ -50,6 +52,8 @@ class LocationService {
     final position = await Geolocator.getCurrentPosition(
       locationSettings: const LocationSettings(accuracy: LocationAccuracy.high)
     );
+
+
 
     if(position.isMocked){return "Denied. mock location detected.";}
 
@@ -105,6 +109,34 @@ class LocationService {
     }
   }
 
+  Future<String> canClockOut(String siteAddress) async {
+    final hasPermission = await ensurePermission();
+    if(!hasPermission){
+      return "Denied. No location service.";
+    }
+
+    String? scheduleId = await getScheduleId(siteAddress);
+      if(scheduleId == "No Schedule"){ return "No schedule found for this site for this day.";}
+
+    final position = await Geolocator.getCurrentPosition(
+      locationSettings: const LocationSettings(accuracy: LocationAccuracy.high)
+    );
+
+    if(position.isMocked){return "Denied. mock location detected.";}
+
+    final distance = Geolocator.distanceBetween(
+      position.latitude, position.longitude,
+      siteLatitude,
+      siteLongitude
+    );
+
+    if(distance <= allowRadiusMeters) {
+      return "True";
+    } else {
+      return "Denied: you are ${(distance/1000).toStringAsFixed(0)} km from location.";
+    }
+  }
+
     Future<String> clockOut(String siteAddress, String? completionNotes, List? images) async {
 
       String? scheduleId = await getScheduleId(siteAddress);
@@ -112,6 +144,10 @@ class LocationService {
 
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final clockInDetails = prefs.getString(scheduleId);
+      if(clockInDetails == null){
+        return "You are not clocked in.";
+      }
+
       ClockInModel details = ClockInModel.fromJson(jsonDecode(clockInDetails!));
 
       String url = "http://10.0.2.2:8000/api/v1/user/clock-out/${details.data.id}/";
@@ -162,5 +198,4 @@ class LocationService {
     if(schedule == null) return "No Schedule";
     return schedule.id;
   }
-
 }

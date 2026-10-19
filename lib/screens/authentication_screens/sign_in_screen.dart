@@ -39,6 +39,7 @@ class _SignInScreenState extends State<SignInScreen> {
             child: Form(
               key: _formKey,
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -58,20 +59,20 @@ class _SignInScreenState extends State<SignInScreen> {
                   _buildEmailTextField(),
                   const SizedBox(height: 20),
                   _buildPasswordTextField(),
-                  const SizedBox(height: 20),
-                  _buildCheckbox(context),
+                  // const SizedBox(height: 20),
+                  // _buildCheckbox(context),
                   const SizedBox(height: 20),
                   if (showErrorMessage) CustomErrorMessage(content: errorMessage),
                   const SizedBox(height: 20),
                   _buildSignInButton(),
                   const SizedBox(height: 30),
-                  CustomTextButton(
-                    content: 'Forgot Password', 
-                    onTap: (){
-                      context.push(RouteNames.forgotPassword);
-                    },
-                    underline: true ,
-                  ),
+                  // CustomTextButton(
+                  //   content: 'Forgot Password', 
+                  //   onTap: (){
+                  //     context.push(RouteNames.forgotPassword);
+                  //   },
+                  //   underline: true ,
+                  // ),
                 ],
               ),
             ),

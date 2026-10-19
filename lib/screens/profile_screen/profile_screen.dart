@@ -1,12 +1,18 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:subsync/blocs/theme_bloc.dart';
+import 'package:subsync/models/dashboard_model.dart';
+import 'package:subsync/models/user_info_model.dart';
 import 'package:subsync/models/user_model.dart';
 import 'package:subsync/services/user_service.dart';
 import 'package:subsync/utils/app_version.dart';
 import 'package:subsync/utils/colors.dart';
 import 'package:subsync/utils/route/route_names.dart';
+import 'package:subsync/utils/text_theme.dart';
 import 'package:subsync/widgets/custom_circular_image_container.dart';
 import 'package:subsync/widgets/custom_profile_settings_container.dart';
 
@@ -18,6 +24,34 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+
+  UserInfoModel? currentUser;
+  DashboardModel? userDashboard;
+  double streakContainerValue = 0;
+
+@override
+  void initState() {
+    loadUserInfo();
+    super.initState();
+  }
+
+  void loadUserInfo() async {
+    
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final userInfo = prefs.getString("currentUserInfo");
+    final userDash = prefs.getString("userDashboard");
+
+    setState(() {
+      userDashboard = DashboardModel.fromJson(jsonDecode(userDash!));
+      currentUser = UserInfoModel.fromJson(jsonDecode(userInfo!));
+      }
+    );
+
+    final val = (userDashboard!.data.services.inProgress + userDashboard!.data.services.completed) / (userDashboard!.data.services.inProgress + userDashboard!.data.services.scheduled + userDashboard!.data.services.completed + userDashboard!.data.services.missed);
+    setState(() => streakContainerValue = val);
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -199,26 +233,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
       children: [
         Container(
           height: 215,
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/images/profileSettingsBgImage.png'),
-              fit: BoxFit.cover
-            )
-          ),
+          // decoration: const BoxDecoration(
+          //   image: DecorationImage(
+          //     image: AssetImage('assets/images/profileSettingsBgImage.png'),
+          //     fit: BoxFit.cover
+          //   )
+          // ),
         ),
         Padding(
-          padding: const EdgeInsets.only(top: 157, left: 15, right: 15),
+          padding: const EdgeInsets.all(10),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               const SizedBox(height: 10),
               CustomCircularImageContainer(
+                height: 100,
                 isChildEmpty: false, 
-                child: SizedBox(height:100, child: Icon(Icons.person))
+                child: SizedBox(height:150, child: Icon(Icons.person, size: 50))
               ),
               const SizedBox(height: 24),
               _buildUserDetails(context),
-              const SizedBox(height: 20),
+              const SizedBox(height: 40),
               _buildAchievementList(context)
             ],
           ),
@@ -233,7 +268,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       onTap: (){},
       child: Container(
         height: 156,
-        decoration: _boxDecoration(),
+        decoration: _boxDecoration(borderColor: themeBloc.currentColor),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -243,14 +278,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
               // SvgPicture.asset('assets/icons/Teardrop.svg', width: 40, fit: BoxFit.scaleDown,),
               LinearProgressIndicator(
                 backgroundColor: themeBloc.isDarkMode ? SubSyncColors.brand90 : SubSyncColors.brand10,
-                value: 0.8,
+                value: streakContainerValue, 
                 minHeight: 8,
                 color: themeBloc.currentColor,
                 borderRadius: BorderRadius.circular(24),
               ),
               Column(children: [
                 Text(
-                  'You have 4 remaining',
+                 (userDashboard != null) 
+                 ? "You have ${userDashboard!.data.services.inProgress + userDashboard!.data.services.scheduled} active schedules" 
+                 : "",
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 2),
@@ -305,12 +342,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   SizedBox _buildAchievementList(BuildContext context) {
     return SizedBox(
-      height: 80,
+      height: 120,
       child: Row(
         children: [
-          _buildAchievementListItem(icon: Icons.construction_rounded, title: '4', subtitle: 'In-progress'),
-          _buildAchievementListItem(icon: Icons.check_circle_outlined, title: '14', subtitle: 'Total Sites', border: Border.symmetric(vertical: BorderSide(width: 1, color: themeBloc.isDarkMode ? SubSyncColors.gray70 : SubSyncColors.gray30))),
-          _buildAchievementListItem(icon: Icons.attach_money_rounded, title: '44K', subtitle: 'Earnings'),
+          _buildAchievementListItem(icon: Icons.construction_rounded, title: (userDashboard != null) ? "${userDashboard!.data.services.inProgress}" : "", subtitle: 'In-progress'),
+          _buildAchievementListItem(icon: Icons.check_circle_outlined, title: (userDashboard != null) ? "${userDashboard!.data.services.completed}" : "", subtitle: 'Completed', border: Border.symmetric(vertical: BorderSide(width: 1, color: themeBloc.isDarkMode ? SubSyncColors.gray70 : SubSyncColors.gray30))),
+          _buildAchievementListItem(icon: Icons.attach_money_rounded, title: (userDashboard != null) ? "${userDashboard!.data.earnings.totalEarnings}" : "", subtitle: 'Earnings'),
         ],
       ),
     );
@@ -332,14 +369,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             // SvgPicture.asset(iconPath, width: 24, fit: BoxFit.scaleDown),
-            Icon(icon),
+            Icon(icon, color: themeBloc.currentColor, size: 33),
             Text(
               title,
-              style: TextStyle(fontWeight: FontWeight.w600),
+              style: Theme.of(context).textTheme.label2xl.copyWith(fontWeight: SubSyncTextStyles.semiBold),
             ),
             Text(
               subtitle,
-              style: TextStyle(color: themeBloc.isDarkMode ? SubSyncColors.gray30 : SubSyncColors.gray60),
+              style: Theme.of(context).textTheme.labelMd.copyWith(fontWeight: SubSyncTextStyles.medium, color: themeBloc.isDarkMode ? SubSyncColors.gray40 : SubSyncColors.gray60),
             ),
           ],
         ),
@@ -348,26 +385,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   SizedBox _buildUserDetails(BuildContext context) {
+
     return SizedBox(
-      height: 86,
+      height: 70,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            'Member since April 2024',
-            style: TextStyle(fontWeight: FontWeight.w600, color: themeBloc.isDarkMode ? SubSyncColors.gray30 : SubSyncColors.gray60),
-          ),
-          Text(
-            'Melissa Johnson',
-            style: TextStyle(fontWeight: FontWeight.w600, color: themeBloc.isDarkMode ? SubSyncColors.gray30 : SubSyncColors.gray60),
-          ),
+          (currentUser !=null)
+          ?  Text(
+              "${currentUser!.data.firstName} ${currentUser!.data.lastName}",
+              style: Theme.of(context).textTheme.label2xl.copyWith(fontWeight: SubSyncTextStyles.semiBold),
+            )
+          : Text(''),
+          
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                'Female',
-                style: TextStyle(fontWeight: FontWeight.w600, color: themeBloc.isDarkMode ? SubSyncColors.gray30 : SubSyncColors.gray60),
-              ),
+              (currentUser !=null)
+              ?  Text(
+                  currentUser!.data.role,
+                  style: Theme.of(context).textTheme.labelSm.copyWith(fontWeight: SubSyncTextStyles.semiBold),
+                )
+              : Text(''),
               const SizedBox(width: 12),
               Container(
                 padding: EdgeInsets.all(2),
@@ -378,10 +417,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   color: themeBloc.isDarkMode ? SubSyncColors.gray70 : SubSyncColors.gray20),
                 ),
               const SizedBox(width: 12),
-              Text(
-                '26 year old',
-                style: TextStyle(fontWeight: FontWeight.w600, color: themeBloc.isDarkMode ? SubSyncColors.gray30 : SubSyncColors.gray60),
-              ),
+              (currentUser !=null)
+              ?  Text(
+                  currentUser!.data.email,
+                  style: Theme.of(context).textTheme.labelSm.copyWith(fontWeight: SubSyncTextStyles.semiBold),
+                )
+              : Text(''),
             ],
           )
         ],

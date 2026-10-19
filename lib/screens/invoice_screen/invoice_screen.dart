@@ -160,6 +160,13 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
     void showInvoiceDetailsDialog(String id) async {
 
     InvoiceDetailsModel? invoice = await InvoiceService.getInvoiceDetails(id);
+    Color invoiceStatusColor = SubSyncColors.gray50;
+
+    if(invoice != null){
+      if(invoice.data.status == "APPROVED") invoiceStatusColor = SubSyncColors.success60; 
+      if(invoice.data.status == "PENDING") invoiceStatusColor = SubSyncColors.brand50; 
+      if(invoice.data.status == "REJECTED") invoiceStatusColor = SubSyncColors.destructive60;
+    }
 
     showDialog(
       context: context, 
@@ -171,25 +178,132 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
         ? Text('No Invoice Data') 
         : SizedBox(
           width: double.infinity,
-          height: MediaQuery.of(context).size.height * 0.7,
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Invoice Details', style: Theme.of(context).textTheme.headingMd.copyWith(fontWeight: SubSyncTextStyles.bold)),
-                  const SizedBox(height: 30),
-                  customListItem('Invoice id: ', invoice.data.id),
-                  customListItem('Invoice number: ', invoice.data.invoiceNumber),
-                  customListItem('Site name: ', invoice.data.site.name),
-                  customListItem('Invoice date: ', DateFormat('yyyy-MM-dd').format(invoice.data.invoiceDate)),
-                  customListItem('Service period start: ', DateFormat('yyyy-MM-dd').format(invoice.data.servicePeriodStart)),
-                  customListItem('Service period end: ', DateFormat('yyyy-MM-dd').format(invoice.data.servicePeriodEnd)),
-                  customListItem('Amount: ', invoice.data.amount),
-                  customListItem('Status: ', invoice.data.status),
-                  customListItem('Verification notes: ', invoice.data.verificationNotes ?? ""),
-                  customListItem('Verrified by: ', invoice.data.verifiedBy ?? ""),
-                  customListItem('Verified at: ', invoice.data.verifiedAt ?? ""),
+                  Row(
+                    children: [
+                      Text("Invoice ${invoice.data.invoiceNumber}", style: Theme.of(context).textTheme.headingMd.copyWith(fontWeight: SubSyncTextStyles.bold)),
+                      Spacer(),
+                      GestureDetector(
+                        onTap: () => context.pop(),
+                        child: SvgPicture.asset('assets/icons/X.svg', width: 20, colorFilter: ColorFilter.mode(SubSyncColors.gray50, BlendMode.srcIn)),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      SvgPicture.asset("assets/icons/location.svg", width: 8, colorFilter: ColorFilter.mode(SubSyncColors.gray50, BlendMode.srcIn)),
+                      const SizedBox(width: 6),
+                      Text(invoice.data.site.name, style: Theme.of(context).textTheme.paragraphSm),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Container(
+                    padding: const EdgeInsets.all(15),
+                    decoration: BoxDecoration(
+                      color: themeBloc.isDarkMode ? SubSyncColors.gray90 : SubSyncColors.gray30,
+                      borderRadius: BorderRadius.circular(SubSyncBorderRadius.radiusLg)
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("Total ${(invoice.data.gst) ? "incl" : "excl"} GST", style: Theme.of(context).textTheme.labelMd.copyWith(color: themeBloc.isDarkMode ? SubSyncColors.gray40:SubSyncColors.gray80)),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                          Text(invoice.data.amount, style: Theme.of(context).textTheme.headingMd.copyWith(fontWeight: SubSyncTextStyles.bold)),
+                          Spacer(),
+                          CustomButton(
+                            height: 25,
+                            width: 80,
+                            onTap: (){},
+                            title: invoice.data.status, 
+                            titleStyle: Theme.of(context).textTheme.labelSm.copyWith(color: invoiceStatusColor),
+                            outlinedBorder: true, 
+                            outlineBorderColor: invoiceStatusColor
+                          )
+                          ],
+                        )
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Row(
+                    children: [
+                      Text("Amount", style: Theme.of(context).textTheme.labelMd.copyWith(color: themeBloc.isDarkMode ? SubSyncColors.gray40 : SubSyncColors.gray80)),
+                      Spacer(),
+                      (invoice.data.gst) 
+                        ? Text((double.parse(invoice.data.amount) * 1.1).toString(), style: Theme.of(context).textTheme.labelMd.copyWith(fontWeight: SubSyncTextStyles.semiBold))
+                        : Text(invoice.data.amount, style: Theme.of(context).textTheme.labelMd.copyWith(fontWeight: SubSyncTextStyles.semiBold))
+                    ],
+                  ),
+                  if(invoice.data.gst) 
+                  Row(
+                    children: [
+                      Text("GST(10%)", style: Theme.of(context).textTheme.labelMd.copyWith(color: themeBloc.isDarkMode ? SubSyncColors.gray70 : SubSyncColors.gray80)),
+                      Spacer(),
+                      Text((double.parse(invoice.data.amount) / 11).toString(), style: Theme.of(context).textTheme.labelMd.copyWith(fontWeight: SubSyncTextStyles.bold)),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Text("Service Period", style: Theme.of(context).textTheme.labelMd.copyWith(fontWeight: SubSyncTextStyles.bold)),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Start", style: Theme.of(context).textTheme.labelSm.copyWith(color: themeBloc.isDarkMode ? SubSyncColors.gray40 : SubSyncColors.gray80)),
+                          Text(DateFormat('d MMM yyyy').format(invoice.data.servicePeriodStart), style: Theme.of(context).textTheme.labelMd.copyWith(fontWeight: SubSyncTextStyles.bold)),                          
+                        ],
+                      ),
+                      Icon(Icons.arrow_right_alt),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text("End", style: Theme.of(context).textTheme.labelSm.copyWith(color: themeBloc.isDarkMode ? SubSyncColors.gray40 : SubSyncColors.gray80)),
+                          Text(DateFormat('d MMM yyyy').format(invoice.data.servicePeriodEnd), style: Theme.of(context).textTheme.labelMd.copyWith(fontWeight: SubSyncTextStyles.bold)),                          
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Divider(),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Text("Invoice Date", style: Theme.of(context).textTheme.labelMd.copyWith(color: themeBloc.isDarkMode ? SubSyncColors.gray40 : SubSyncColors.gray80)),
+                      Spacer(),
+                      Text(DateFormat('d MMM yyyy').format(invoice.data.invoiceDate), style: Theme.of(context).textTheme.labelMd.copyWith(fontWeight: SubSyncTextStyles.semiBold))
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Text("Verification", style: Theme.of(context).textTheme.labelMd.copyWith(fontWeight: SubSyncTextStyles.bold)),
+                  const SizedBox(height: 10),
+                  Container(
+                    padding: const EdgeInsets.all(15),
+                    decoration: BoxDecoration(
+                      color: themeBloc.isDarkMode ? SubSyncColors.gray90 : SubSyncColors.gray30,
+                      borderRadius: BorderRadius.circular(SubSyncBorderRadius.radiusLg)
+                    ),
+                    child: Text("Not approved yet. Approvers details and will will show here once this invoice is checked.", style: Theme.of(context).textTheme.labelSm.copyWith(fontWeight: SubSyncTextStyles.medium))  
+                  ),
+                  const SizedBox(height: 10),
+                  Divider(),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Text("Invoice ID:", style: Theme.of(context).textTheme.labelMd.copyWith(color: themeBloc.isDarkMode ? SubSyncColors.gray40 : SubSyncColors.gray80)),
+                      Spacer(),
+                      Text(invoice.data.id, style: Theme.of(context).textTheme.labelMd.copyWith(color: themeBloc.isDarkMode ? SubSyncColors.gray40 : SubSyncColors.gray80))
+                    ],
+                  ),
                 ],
               ),
           ),
